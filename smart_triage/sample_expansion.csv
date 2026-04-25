@@ -1,0 +1,5 @@
+disease,urgency,prior,description,symptom1,prob1,symptom2,prob2,symptom3,prob3,symptom4,prob4,symptom5,prob5
+Chickenpox,Moderate,0.04,Viral infection causing itchy blister-like rash,rash,0.95,fever,0.70,itching,0.90,fatigue,0.65,loss_of_appetite,0.55
+Hepatitis B,Emergency,0.02,Viral liver infection causing jaundice and fatigue,jaundice,0.80,fatigue,0.88,nausea,0.70,abdominal_pain,0.65,fever,0.50
+Sinusitis,Low,0.08,Inflammation of sinuses causing facial pain and congestion,congestion,0.90,facial_pain,0.85,headache,0.78,runny_nose,0.80,fever,0.30
+Meningitis,Emergency,0.01,Infection of membranes surrounding brain and spinal cord,severe_headache,0.90,fever,0.85,neck_stiffness,0.88,confusion,0.65,sensitivity_to_light,0.75

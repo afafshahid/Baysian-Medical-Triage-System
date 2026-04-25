@@ -1,0 +1,46 @@
+{
+  "Leptospirosis": {
+    "prior": 0.02,
+    "urgency": "Emergency",
+    "description": "Bacterial infection from animal urine, common after floods",
+    "symptoms": {
+      "fever": 0.90,
+      "headache": 0.80,
+      "muscle_ache": 0.85,
+      "jaundice": 0.55,
+      "rash": 0.35,
+      "red_eyes": 0.65,
+      "vomiting": 0.60,
+      "abdominal_pain": 0.50
+    }
+  },
+  "Irritable Bowel Syndrome": {
+    "prior": 0.07,
+    "urgency": "Low",
+    "description": "Chronic GI disorder affecting large intestine",
+    "symptoms": {
+      "abdominal_pain": 0.88,
+      "bloating": 0.85,
+      "diarrhea": 0.75,
+      "constipation": 0.65,
+      "cramping": 0.82,
+      "nausea": 0.50,
+      "fatigue": 0.55
+    }
+  },
+  "Heat Stroke": {
+    "prior": 0.02,
+    "urgency": "Emergency",
+    "description": "Life-threatening overheating of the body requiring immediate cooling",
+    "symptoms": {
+      "fever": 0.95,
+      "confusion": 0.80,
+      "rapid_breathing": 0.75,
+      "sweating": 0.70,
+      "headache": 0.75,
+      "nausea": 0.65,
+      "weakness": 0.80,
+      "loss_of_consciousness": 0.40
+    }
+  }
+}

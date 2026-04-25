@@ -1,0 +1,8 @@
+pip install -r requirements.txt
+streamlit run app.py
+
+Terminal 1 — Flask API:
+python api.py
+
+Terminal 2 — Streamlit:
+streamlit run app.py
