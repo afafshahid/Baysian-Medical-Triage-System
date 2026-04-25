@@ -1,0 +1,1 @@
+# Baysian-Medical-Triage-System
