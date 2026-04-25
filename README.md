@@ -47,6 +47,36 @@ Bayesian-Medical-Triage-System/
 
 ---
 
+## Bayesian Network (Core of the Project)
+
+This project is centered on a Bayesian diagnostic model where:
+- each **disease** has a prior probability `P(D)`,
+- each **symptom** has a conditional probability `P(S|D)`,
+- the model estimates posterior probability `P(D|S)` for each disease.
+
+At runtime, the engine computes:
+
+\[
+P(D \mid S_1, S_2, ..., S_n) \propto P(D)\prod_i P(S_i \mid D)
+\]
+
+Then scores are normalized across all diseases to get ranked probabilities.
+
+### What makes this network clinically useful in this project
+- **Personalized priors**: baseline priors are adjusted using age, sex, chronic conditions, and symptom duration.
+- **Uncertainty-aware ranking**: output is a probability distribution, not a single hard label.
+- **Safety override layer**: emergency rule checks can override posterior ranking for high-risk cases.
+- **Explainability signals**: top symptom matches and context notes are generated alongside predictions.
+
+### Where this is implemented
+- `smart_triage/inference_engine.py` — posterior computation, prior adjustment, risk/confidence logic.
+- `smart_triage/knowledge_base.py` — disease priors, symptom likelihood tables, emergency rules.
+- `smarttriage-react/src/bayesianEngine.js` — browser-side mirror of Bayesian logic for offline fallback.
+
+> Note: The implementation follows a practical Naive-Bayes-style factorization for symptom evidence, combined with rule-based safety checks for triage.
+
+---
+
 ## Core Components
 
 ### Backend (`smart_triage`)
