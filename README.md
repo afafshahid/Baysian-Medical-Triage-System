@@ -91,7 +91,7 @@ npm install
 npm run dev
 ```
 
-Vite serves on `http://localhost:3000` and proxies `/api/*` to `http://localhost:5000`.
+Vite is configured in `vite.config.js` to serve on `http://localhost:3000` and proxy `/api/*` to `http://localhost:5000`.
 
 ---
 
