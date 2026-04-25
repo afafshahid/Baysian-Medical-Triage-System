@@ -1,4 +1,4 @@
-# Baysian Medical Triage System (SmartTriage AI)
+# Bayesian Medical Triage System (SmartTriage AI)
 
 SmartTriage AI is an academic full-stack triage assistant that estimates likely conditions from symptoms using a Bayesian inference engine, then classifies urgency as **Emergency**, **Moderate**, or **Low**.
 
@@ -13,7 +13,7 @@ It includes:
 ## Repository Structure
 
 ```text
-Baysian-Medical-Triage-System/
+Bayesian-Medical-Triage-System/
 ├── README.md
 ├── smart_triage/                # Python backend + Streamlit UI
 │   ├── api.py                   # Flask REST API
@@ -66,10 +66,10 @@ Baysian-Medical-Triage-System/
 
 ## Setup and Run
 
-## 1) Backend setup
+### 1) Backend setup
 
 ```bash
-cd /home/runner/work/Baysian-Medical-Triage-System/Baysian-Medical-Triage-System/smart_triage
+cd smart_triage
 python -m pip install -r requirements.txt
 ```
 
@@ -83,10 +83,10 @@ Run Streamlit app (optional/alternative UI):
 streamlit run app.py
 ```
 
-## 2) Frontend setup
+### 2) Frontend setup
 
 ```bash
-cd /home/runner/work/Baysian-Medical-Triage-System/Baysian-Medical-Triage-System/smarttriage-react
+cd smarttriage-react
 npm install
 npm run dev
 ```
