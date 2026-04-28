@@ -7,6 +7,9 @@ import numpy as np
 from typing import List, Dict, Any
 
 
+EPS = 1e-12
+
+
 class BayesianTriage:
     def __init__(self, diseases: dict, emergency_rules: list):
         self.diseases = diseases
@@ -15,42 +18,53 @@ class BayesianTriage:
     # ─── Core Bayesian Computation ────────────────────────────────────────────
     def _compute_posterior(self, symptoms: List[str], patient_ctx: dict) -> List[dict]:
         results = []
+        sym_norm = [s.lower().replace(" ", "_") for s in symptoms]
+        sym_set = set(sym_norm)
+
         for disease_name, disease_data in self.diseases.items():
             prior = disease_data["prior"]
             prior = self._adjust_prior(prior, disease_name, patient_ctx)
+            log_prior = np.log(max(prior, EPS))
 
-            # Compute P(S|D) — joint likelihood of all symptoms given disease
-            likelihood = 1.0
-            for symptom in symptoms:
-                sym_norm = symptom.lower().replace(" ", "_")
-                p_sym_given_disease = disease_data["symptoms"].get(sym_norm, 0.02)
-                likelihood *= p_sym_given_disease
+            # Compute log P(S|D) — joint likelihood of all symptoms given disease
+            log_likelihood = 0.0
+            for symptom in sym_norm:
+                p_sym_given_disease = disease_data["symptoms"].get(symptom, 0.02)
+                log_likelihood += np.log(max(p_sym_given_disease, EPS))
 
             # Also penalize for absence of highly expected symptoms for this disease
             # (soft constraint)
             all_disease_syms = disease_data["symptoms"]
             for key_sym, key_prob in all_disease_syms.items():
-                if key_sym not in [s.lower().replace(" ", "_") for s in symptoms]:
+                if key_sym not in sym_set:
                     if key_prob > 0.80:
-                        likelihood *= (1 - key_prob * 0.5)  # gentle penalty
+                        penalty = 1 - key_prob * 0.5  # gentle penalty
+                        log_likelihood += np.log(max(penalty, EPS))
 
-            # Unnormalized posterior
-            unnorm = likelihood * prior
+            # Unnormalized posterior (in log space for stability)
+            log_unnorm = log_likelihood + log_prior
             results.append({
                 "disease": disease_name,
-                "unnormalized": unnorm,
+                "log_unnormalized": log_unnorm,
+                "unnormalized": float(np.exp(log_unnorm)),
                 "prior": prior,
-                "likelihood": likelihood,
+                "log_likelihood": log_likelihood,
+                "likelihood": float(np.exp(log_likelihood)),
                 "urgency": disease_data["urgency"],
                 "description": disease_data["description"],
             })
 
-        # Normalize: P(D|S) = unnorm / sum(all unnorm)
-        total = sum(r["unnormalized"] for r in results)
+        if not results:
+            return results
+
+        # Normalize: P(D|S) = exp(log_unnorm - log_sum_exp)
+        max_log = max(r["log_unnormalized"] for r in results)
+        total = sum(np.exp(r["log_unnormalized"] - max_log) for r in results)
         if total == 0:
             total = 1e-10
+        log_total = max_log + np.log(total)
         for r in results:
-            r["probability"] = r["unnormalized"] / total
+            r["probability"] = float(np.exp(r["log_unnormalized"] - log_total))
 
         results.sort(key=lambda x: x["probability"], reverse=True)
         return results
@@ -179,7 +193,7 @@ class BayesianTriage:
             matched = [s for s in sym_norm if s in top["disease_symptoms"]]
             if matched:
                 explanations.append(
-                    f"{top['disease']} was ranked highest because {len(matched)} of your symptoms "
+                    f"{top['disease']} was ranked highest because {len(matched)} of your symptoms 
                     f"({', '.join(matched[:3])}) have high likelihood for this condition."
                 )
 
