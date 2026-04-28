@@ -7,6 +7,10 @@
 
 import { DISEASES, EMERGENCY_RULES } from './knowledgeBase.js';
 
+const EPS = 1e-12;
+
+const safeLog = (p) => Math.log(Math.max(p, EPS));
+
 // ── Prior adjustment (mirrors _adjust_prior in inference_engine.py) ──────────
 function adjustPrior(prior, diseaseName, ctx) {
   const age      = ctx.age      ?? 30;
@@ -101,27 +105,34 @@ function adjustPrior(prior, diseaseName, ctx) {
 // ── Core Bayesian computation ─────────────────────────────────────────────────
 function computePosterior(symptoms, ctx) {
   const symNorm = symptoms.map(s => s.toLowerCase().replace(/ /g, '_'));
+  const symSet = new Set(symNorm);
   const results = [];
 
   for (const [diseaseName, diseaseData] of Object.entries(DISEASES)) {
-    let prior = adjustPrior(diseaseData.prior, diseaseName, ctx);
-    let likelihood = 1.0;
+    const prior = adjustPrior(diseaseData.prior, diseaseName, ctx);
+    const logPrior = safeLog(prior);
+    let logLikelihood = 0.0;
 
     for (const sym of symNorm) {
       const p = diseaseData.symptoms[sym] ?? 0.02;
-      likelihood *= p;
+      logLikelihood += safeLog(p);
     }
 
     // Soft penalty for absent high-probability symptoms
     for (const [keySym, keyProb] of Object.entries(diseaseData.symptoms)) {
-      if (!symNorm.includes(keySym) && keyProb > 0.80) {
-        likelihood *= (1 - keyProb * 0.5);
+      if (!symSet.has(keySym) && keyProb > 0.80) {
+        const penalty = 1 - keyProb * 0.5;
+        logLikelihood += safeLog(penalty);
       }
     }
 
+    const logUnnormalized = logLikelihood + logPrior;
     results.push({
       disease: diseaseName,
-      unnormalized: likelihood * prior,
+      log_unnormalized: logUnnormalized,
+      unnormalized: Math.exp(logUnnormalized),
+      log_likelihood: logLikelihood,
+      likelihood: Math.exp(logLikelihood),
       probability: 0,
       urgency: diseaseData.urgency,
       description: diseaseData.description,
@@ -129,8 +140,20 @@ function computePosterior(symptoms, ctx) {
     });
   }
 
-  const total = results.reduce((s, r) => s + r.unnormalized, 0) || 1e-10;
-  for (const r of results) r.probability = r.unnormalized / total;
+  if (results.length === 0) return results;
+
+  const maxLog = Math.max(...results.map(r => r.log_unnormalized));
+  let total = 0;
+  for (const r of results) {
+    total += Math.exp(r.log_unnormalized - maxLog);
+  }
+  if (total === 0) total = 1e-10;
+  const logTotal = maxLog + Math.log(total);
+
+  for (const r of results) {
+    r.probability = Math.exp(r.log_unnormalized - logTotal);
+  }
+
   results.sort((a, b) => b.probability - a.probability);
   return results;
 }
